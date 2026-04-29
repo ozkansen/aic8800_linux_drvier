@@ -22,9 +22,26 @@
 #ifndef _RWNX_COMPAT_H_
 #define _RWNX_COMPAT_H_
 #include <linux/version.h>
+#include <linux/timer.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 10, 0)
 #error "Minimum kernel version supported is 3.10"
+#endif
+
+/* Kernel 6.15: legacy del_timer{,_sync} aliases removed (renamed in 6.2). */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 15, 0)
+#ifndef del_timer
+#define del_timer       timer_delete
+#endif
+#ifndef del_timer_sync
+#define del_timer_sync  timer_delete_sync
+#endif
+#endif
+
+/* Kernel 6.16: from_timer() was renamed to timer_container_of(). */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0) && !defined(from_timer)
+#define from_timer(var, callback_timer, timer_fieldname) \
+	timer_container_of(var, callback_timer, timer_fieldname)
 #endif
 
 /* Generic */
