@@ -10,18 +10,18 @@ Minor_version=`uname -r |awk -F'.' '{print $2}'`
 
 echo "Authentication requested [root] for setup:"
 if [ "`uname -r |grep fc`" == " " ]; then
-	sudo su -c "cp -rf ./fw/aic8800D80 /lib/firmware/"; Error=$?
-	sudo su -c "cp ./tools/aic.rules /etc/udev/rules.d"; Error=$?
-    sudo su -c "udevadm trigger"; Error=$?
-	sudo su -c "udevadm control --reload"; Error=$?
+	sudo sh -c "cp -rf ./fw/aic8800D80 /lib/firmware/"; Error=$?
+	sudo sh -c "cp ./tools/aic.rules /etc/udev/rules.d"; Error=$?
+    sudo sh -c "udevadm trigger"; Error=$?
+	sudo sh -c "udevadm control --reload-rules"; Error=$?
 	if [ -L /dev/aicudisk ]; then
-		sudo su -c "eject /dev/aicudisk"; Error=$?
+		sudo sh -c "eject /dev/aicudisk"; Error=$?
 	fi
 else
 	su -c "cp -rf ./fw/aic8800D80 /lib/firmware/"; Error=$?
 	su -c "cp ./tools/aic.rules /etc/udev/rules.d"; Error=$?
     su -c "udevadm trigger"; Error=$?
-	su -c "udevadm control --reload"; Error=$?
+	su -c "udevadm control --reload-rules"; Error=$?
 	if [ -L /dev/aicudisk ]; then
 		su -c "eject /dev/aicudisk"; Error=$?
 	fi
