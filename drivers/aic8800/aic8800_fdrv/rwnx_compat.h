@@ -44,6 +44,11 @@
 	timer_container_of(var, callback_timer, timer_fieldname)
 #endif
 
+/* Kernel 6.16: mod_timer() was renamed to timer_mod(). */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0) && !defined(mod_timer)
+#define mod_timer timer_mod
+#endif
+
 /* Generic */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 9, 0)
 #define __bf_shf(x) (__builtin_ffsll(x) - 1)
