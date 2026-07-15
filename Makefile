@@ -27,7 +27,6 @@ uninstall:
 # Clean the build artifacts
 clean:
 	@echo "Cleaning the build artifacts..."
-	cd $(BUILD_DIR) && make clean
 	$(MAKE) -C $(BUILD_DIR) clean
 
 # Phony targets to avoid conflicts with files
