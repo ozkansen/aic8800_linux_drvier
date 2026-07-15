@@ -1345,6 +1345,10 @@ static int aicloadfw_chipmatch(struct aic_usb_dev *usb_dev, u16 vid, u16 pid){
 	usb_dev->chipid = PRODUCT_ID_AIC8800D81;
 	AICWFDBG(LOGINFO, "%s USE AIC8800D41\r\n", __func__);
 	return 0;
+    }else if(vid == USB_VENDOR_ID_MERCUCYS && pid == USB_DEVICE_ID_AIC_8800DC_MC){
+	usb_dev->chipid = PRODUCT_ID_AIC8800D80;
+	AICWFDBG(LOGINFO, "%s USE AIC8800DC (Mercucys) as D80\r\n", __func__);
+	return 0;
     }else{
         return -1;
     }
@@ -1606,7 +1610,8 @@ static int aicwf_usb_probe(struct usb_interface *intf, const struct usb_device_i
 	if(fw_loaded == 1 && 
         (id->idProduct == USB_DEVICE_ID_AIC_8801 || 
         id->idProduct == USB_DEVICE_ID_AIC_8800D81 ||
-	id->idProduct == USB_DEVICE_ID_AIC_8800D41)){
+	id->idProduct == USB_DEVICE_ID_AIC_8800D41 ||
+	id->idProduct == USB_DEVICE_ID_AIC_8800DC_MC)){
 		return -1;
 	}
 
@@ -1764,6 +1769,7 @@ static struct usb_device_id aicwf_usb_id_table[] = {
     {USB_DEVICE(USB_VENDOR_ID_AIC, USB_DEVICE_ID_AIC_8800D81)},
     {USB_DEVICE(USB_VENDOR_ID_AIC, USB_DEVICE_ID_AIC_8800D40)},
     {USB_DEVICE(USB_VENDOR_ID_AIC, USB_DEVICE_ID_AIC_8800D41)},
+    {USB_DEVICE(USB_VENDOR_ID_MERCUCYS, USB_DEVICE_ID_AIC_8800DC_MC)},
     {}
 };
 

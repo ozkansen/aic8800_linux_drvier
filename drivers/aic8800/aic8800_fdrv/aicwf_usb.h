@@ -19,12 +19,14 @@
 #define USB_VENDOR_ID_TP                 0x2357
 #define USB_VENDOR_ID_TENDA              0x2604
 #define USB_VENDOR_ID_AIC_USB            0x368b
+#define USB_VENDOR_ID_MERCUCYS           0x2C4E
 
 #define USB_PRODUCT_ID_TP               0x014e
 #define USB_PRODUCT_ID_MERCURY          0x014b
 #define USB_PRODUCT_ID_FAST             0x014f
 
 #define USB_PRODUCT_ID_TENDA            0x001f
+#define USB_PRODUCT_ID_AIC8800DC_MC     0x0126
 
 #ifndef CONFIG_USB_BT
 #define USB_PRODUCT_ID_AIC8800			0x8800
