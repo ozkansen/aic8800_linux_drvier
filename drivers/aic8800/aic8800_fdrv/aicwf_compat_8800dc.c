@@ -2983,7 +2983,9 @@ int aicwf_dpd_result_write_8800dc(void *buf, int buf_len)
     char *path = NULL;
     struct file *fp = NULL;
     loff_t pos = 0;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
     mm_segment_t fs;
+#endif
 
 	AICWFDBG(LOGINFO, "%s\n", __func__);
     path = __getname();
@@ -3003,8 +3005,10 @@ int aicwf_dpd_result_write_8800dc(void *buf, int buf_len)
         return -1;
     }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
     fs = get_fs();
     set_fs(KERNEL_DS);
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
     sum = kernel_write(fp, buf, buf_len, &pos);
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 9, 0)
@@ -3012,8 +3016,10 @@ int aicwf_dpd_result_write_8800dc(void *buf, int buf_len)
 #else
     sum = vfs_write(fp, (char *)buf, buf_len, &pos);
 #endif
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
     set_fs(fs);
+#endif
+
     __putname(path);
     filp_close(fp, NULL);
 	fp = NULL;
