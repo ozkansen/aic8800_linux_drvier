@@ -1,2 +1,9 @@
-KERNEL=="sd*", ATTRS{idVendor}=="a69c", ATTRS{idProduct}=="5721",  SYMLINK+="aicudisk", RUN+="/usr/bin/eject /dev/%k"
-KERNEL=="sd*", ATTRS{idVendor}=="a69c", ATTRS{idProduct}=="5723",  SYMLINK+="tendaudisk", RUN+="/usr/bin/eject /dev/%k"
+# AIC8800 USB Mass Storage auto-eject rules
+# When the AIC8800 boots, it first appears as a USB mass storage device.
+# Ejecting the storage triggers the device to switch to WiFi/BT mode.
+
+# AIC8800 — eject MSC to enter WiFi mode
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd*", ENV{ID_VENDOR_ID}=="a69c", ENV{ID_MODEL_ID}=="5721", RUN+="/bin/sh -c 'sleep 1 && /usr/bin/eject /dev/%k 2>/dev/null || /bin/true'"
+
+# Tenda variant
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd*", ENV{ID_VENDOR_ID}=="a69c", ENV{ID_MODEL_ID}=="5723", RUN+="/bin/sh -c 'sleep 1 && /usr/bin/eject /dev/%k 2>/dev/null || /bin/true'"
