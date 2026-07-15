@@ -23,10 +23,17 @@ echo ""
 echo "[1/4] Copying firmware..."
 run_root "cp -rf ./fw/aic8800D80 /lib/firmware/"
 if [ $? -ne 0 ]; then
-	echo "ERROR: Failed to copy firmware!"
+	echo "ERROR: Failed to copy D80 firmware!"
 	exit 1
 fi
-echo "  Firmware copied to /lib/firmware/aic8800D80/"
+echo "  Copied /lib/firmware/aic8800D80/"
+
+run_root "cp -rf ./fw/aic8800DC /lib/firmware/"
+if [ $? -ne 0 ]; then
+	echo "ERROR: Failed to copy DC firmware!"
+	exit 1
+fi
+echo "  Copied /lib/firmware/aic8800DC/"
 
 # --- 2. Install udev rules ---
 echo "[2/4] Installing udev rules..."
@@ -79,11 +86,20 @@ fi
 
 # --- 4. Verify ---
 echo "[4/4] Verifying installation..."
+FW_OK=1
 if [ -d /lib/firmware/aic8800D80 ]; then
 	FW_COUNT=$(ls /lib/firmware/aic8800D80/*.bin /lib/firmware/aic8800D80/*.txt 2>/dev/null | wc -l)
-	echo "  Firmware: $FW_COUNT files in /lib/firmware/aic8800D80/"
+	echo "  aic8800D80 firmware: $FW_COUNT files"
 else
-	echo "  WARNING: Firmware directory not found!"
+	echo "  WARNING: aic8800D80 firmware directory not found!"
+	FW_OK=0
+fi
+if [ -d /lib/firmware/aic8800DC ]; then
+	FW_COUNT=$(ls /lib/firmware/aic8800DC/*.bin /lib/firmware/aic8800DC/*.txt 2>/dev/null | wc -l)
+	echo "  aic8800DC firmware: $FW_COUNT files"
+else
+	echo "  WARNING: aic8800DC firmware directory not found!"
+	FW_OK=0
 fi
 
 if [ -f /etc/udev/rules.d/aic.rules ]; then
@@ -97,9 +113,11 @@ echo "##################################################"
 echo "Setup complete!"
 echo ""
 echo "Next steps:"
-echo "  1. Load the firmware loader:  sudo modprobe aic_load_fw"
-echo "  2. Load the WiFi driver:      sudo modprobe aic8800_fdrv"
-echo "  3. Verify interface:          ip link show"
+echo "  1. Load the WiFi driver:  sudo modprobe aic8800_fdrv"
+echo "  2. Verify interface:      ip link show"
+echo ""
+echo "Note: aic_load_fw is NOT needed for AIC8800DC devices."
+echo "      The firmware is loaded by aic8800_fdrv directly."
 echo ""
 echo "If wlan0 does not appear, run: dmesg | tail -20"
 echo "##################################################"

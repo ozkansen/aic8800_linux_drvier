@@ -93,18 +93,31 @@ sudo depmod -a $(uname -r)
 
 ## Loading the Driver
 
-Load modules in order — firmware loader first, then Wi-Fi:
+Load modules. The required modules depend on your chip variant:
+
+### AIC8800DC (most common, e.g. Orange Pi, Mercucys)
+
+Only the WiFi driver is needed — firmware is loaded automatically:
+
+```bash
+sudo modprobe aic8800_fdrv
+```
+
+### AIC8800 / AIC8800D80
+
+Load firmware loader first, then WiFi driver:
 
 ```bash
 sudo modprobe aic_load_fw
 sudo modprobe aic8800_fdrv
 ```
 
-Or with `insmod` (if not installed via `make install`):
+To check which chip you have:
 
 ```bash
-sudo insmod drivers/aic8800/aic_load_fw/aic_load_fw.ko
-sudo insmod drivers/aic8800/aic8800_fdrv/aic8800_fdrv.ko
+lsusb | grep -i aic
+# a69c:8800 or 2c4e:0126 → AIC8800DC (WiFi driver only)
+# a69c:8d80             → AIC8800D80 (both modules)
 ```
 
 Verify modules are loaded:
@@ -135,6 +148,7 @@ sudo rmmod aic8800_fdrv
 sudo rmmod aic_load_fw
 sudo rm -rf /lib/modules/$(uname -r)/kernel/drivers/net/wireless/aic8800
 sudo rm -rf /lib/firmware/aic8800D80
+sudo rm -rf /lib/firmware/aic8800DC
 sudo rm /etc/udev/rules.d/aic.rules
 sudo udevadm control --reload-rules
 sudo depmod -a $(uname -r)
@@ -203,21 +217,21 @@ dmesg | tail -30
 dmesg | grep -i aic
 ```
 
-Verify firmware exists:
+Verify firmware exists for your chip variant:
 
 ```bash
+# AIC8800DC
+ls -la /lib/firmware/aic8800DC/
+
+# AIC8800D80
 ls -la /lib/firmware/aic8800D80/
 ```
 
-Expected files:
+If firmware is missing, re-run `sudo make install`.
 
-- `fmacfw_8800d80_u02.bin`
-- `fw_patch_8800d80_u02.bin`
-- `fw_patch_table_8800d80_u02.bin`
-- `fw_adid_8800d80_u02.bin`
-- `lmacfw_rf_8800d80_u02.bin`
-- `calibmode_8800d80.bin`
-- `fw_ble_scan_ad_filter.bin`
+### "fmacfw_patch_8800dc_u02.bin failed to open"
+
+Your device is AIC8800DC and needs DC firmware. The firmware is included in this repo under `fw/aic8800DC/`. Run `sudo make install` to copy it to `/lib/firmware/aic8800DC/`.
 - `aic_userconfig_8800d80.txt`
 
 ### modprobe fails with "Exec format error"

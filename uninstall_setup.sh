@@ -42,7 +42,9 @@ fi
 # --- 3. Remove firmware ---
 echo "[3/5] Removing firmware..."
 run_root "rm -rf /lib/firmware/aic8800D80"
+run_root "rm -rf /lib/firmware/aic8800DC"
 echo "  Removed /lib/firmware/aic8800D80/"
+echo "  Removed /lib/firmware/aic8800DC/"
 
 # --- 4. Remove udev rules ---
 echo "[4/5] Removing udev rules..."
