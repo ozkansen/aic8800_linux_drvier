@@ -4,7 +4,7 @@
 ################################################################################
 echo "Clean aic8800 wifi driver setup files!"
 echo "Authentication requested [root] for clean:"
-if [ "`uname -r |grep fc`" == " " ]; then
+if ! uname -r | grep -q '\.fc[0-9]'; then
 	  sudo sh -c "rm -rf /lib/firmware/aic8800D80/"; Error=$?
 	  sudo sh -c "rm /etc/udev/rules.d/aic.rules"; Error=$?
 	  sudo sh -c "udevadm control --reload-rules"; Error=$?

@@ -9,7 +9,7 @@ Main_version=`uname -r |awk -F'.' '{print $1}'`
 Minor_version=`uname -r |awk -F'.' '{print $2}'`
 
 echo "Authentication requested [root] for setup:"
-if [ "`uname -r |grep fc`" == " " ]; then
+if ! uname -r | grep -q '\.fc[0-9]'; then
 	sudo sh -c "cp -rf ./fw/aic8800D80 /lib/firmware/"; Error=$?
 	if [ $Error -ne 0 ]; then
 		echo "ERROR: Firmware kopyalanamadi!"
