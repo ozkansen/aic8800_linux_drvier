@@ -2172,7 +2172,7 @@ check_len_update:
                 }
 
                 if (hw_rxhdr->flags_is_4addr && !rwnx_vif->use_4addr) {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0)
                     cfg80211_rx_unexpected_4addr_frame(rwnx_vif->ndev,
                                                        sta->mac_addr, -1, GFP_ATOMIC);
 #else
