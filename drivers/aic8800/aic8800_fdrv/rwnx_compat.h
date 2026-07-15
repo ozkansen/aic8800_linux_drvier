@@ -3,7 +3,7 @@
  *
  * @file rwnx_compat.h
  *
- * Ensure driver compilation for linux 3.16 to 3.19
+ * Ensure driver compilation for linux 3.10 to 6.18+
  *
  * To avoid too many #if LINUX_VERSION_CODE if the code, when prototype change
  * between different kernel version:
@@ -14,6 +14,12 @@
  * - For internal function (e.g. cfg80211_ops) do the same but the macro name
  *   doesn't need to have the _compat suffix when the function is not used
  *   directly by the driver
+ *
+ * Compatibility matrix:
+ * - Kernel 6.15: del_timer/del_timer_sync -> timer_delete/timer_delete_sync
+ * - Kernel 6.16: from_timer -> timer_container_of, mod_timer -> timer_mod
+ * - Kernel 6.13+: radio_idx parameter added to cfg80211 callbacks
+ * - Kernel 6.7+: cfg80211_ap_update struct for change_beacon
  *
  * Copyright (C) RivieraWaves 2018
  *
