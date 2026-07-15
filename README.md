@@ -4,11 +4,20 @@ Linux driver for the AIC8800 Wi-Fi/BT chipset, supporting USB and SDIO interface
 
 ## How It Works
 
-The AIC8800 chipset boots in **USB Mass Storage mode** (product ID `0x5721`), appearing as a flash drive. This is normal — the flash drive contains the chip's firmware. To switch to WiFi mode, the mass storage device must be **ejected**. After eject, the chip re-enumerates as a WiFi device and the driver takes over.
+The AIC8800 chipset boots in **USB Mass Storage mode** (vendor `a69c`, product `5721`), appearing as a flash drive. This is normal — the flash drive contains the chip's firmware. To switch to WiFi mode, the mass storage device must be **ejected**. After eject, the chip re-enumerates as a WiFi device and the driver takes over.
 
 ```
-Boot → USB Mass Storage (0x5721) → Eject → Re-enumerate as WiFi (0x8800) → Driver loads firmware → wlan0 appears
+Boot → USB Mass Storage (a69c:5721) → Eject → Re-enumerate as WiFi → Driver loads firmware → wlan0 appears
 ```
+
+The WiFi mode product ID varies by board variant:
+
+| Vendor | Product | Chip | Notes |
+|--------|---------|------|-------|
+| `a69c` | `8800` | AIC8800 | Standard |
+| `a69c` | `8801` | AIC8801 | |
+| `a69c` | `88dc` | AIC8800DC | Standard DC |
+| `2c4e` | `0126` | AIC8800DC | Mercucys variant (Orange Pi) |
 
 The `install_setup.sh` script handles the eject automatically. The udev rule in `tools/aic.rules` also auto-ejects on boot.
 
@@ -145,6 +154,7 @@ Expected output (USB):
 alias:          usb:vA69Cp8800d*
 alias:          usb:vA69Cp8801d*
 alias:          usb:vA69Cp8D81d*
+alias:          usb:v2C4Ep0126d*
 ```
 
 If you see `sdio:` aliases instead, the SDIO version is installed. Rebuild and reinstall:
@@ -153,6 +163,21 @@ If you see `sdio:` aliases instead, the SDIO version is installed. Rebuild and r
 make clean && make
 sudo make uninstall
 sudo make install
+```
+
+## Verifying WiFi Device Detection
+
+After eject, check `lsusb` for the WiFi device:
+
+```bash
+lsusb | grep -i aic
+```
+
+Expected (one of):
+
+```
+Bus XXX Device YYY: ID a69c:8800 aicsemi AIC8800     # Standard
+Bus XXX Device YYY: ID 2c4e:0126 Mercucys INC AIC8800DC  # Mercucys variant
 ```
 
 ## Troubleshooting
