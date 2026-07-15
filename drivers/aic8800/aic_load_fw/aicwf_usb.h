@@ -21,10 +21,8 @@
 
 /* USB Device ID */
 #define USB_VENDOR_ID_AIC               0xA69C
-#define USB_VENDOR_ID_MERCUCYS          0x2C4E
 #define USB_DEVICE_ID_AIC               0x8800
 #define USB_DEVICE_ID_AIC_8801		    0x8801
-#define USB_DEVICE_ID_AIC_8800DC_MC     0x0126
 
 #define CHIP_REV_U01        0x1
 #define CHIP_REV_U02        0x3
