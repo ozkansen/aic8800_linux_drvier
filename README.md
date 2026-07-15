@@ -2,6 +2,16 @@
 
 Linux driver for the AIC8800 Wi-Fi/BT chipset, supporting USB and SDIO interfaces.
 
+## How It Works
+
+The AIC8800 chipset boots in **USB Mass Storage mode** (product ID `0x5721`), appearing as a flash drive. This is normal — the flash drive contains the chip's firmware. To switch to WiFi mode, the mass storage device must be **ejected**. After eject, the chip re-enumerates as a WiFi device and the driver takes over.
+
+```
+Boot → USB Mass Storage (0x5721) → Eject → Re-enumerate as WiFi (0x8800) → Driver loads firmware → wlan0 appears
+```
+
+The `install_setup.sh` script handles the eject automatically. The udev rule in `tools/aic.rules` also auto-ejects on boot.
+
 ## Supported Platforms
 
 | Platform | Board | Kernel | Status |
@@ -39,7 +49,7 @@ This builds two kernel modules:
 
 ## Installation
 
-### Automatic
+### Automatic (Recommended)
 
 ```bash
 sudo make install
@@ -47,11 +57,12 @@ sudo make install
 
 This will:
 
-1. Copy both `.ko` files to `/lib/modules/$(uname -r)/kernel/drivers/net/wireless/aic8800/`
-2. Run `depmod`
+1. Build the driver modules
+2. Install modules to `/lib/modules/$(uname -r)/kernel/drivers/net/wireless/aic8800/`
 3. Copy firmware files to `/lib/firmware/aic8800D80/`
 4. Install udev rules to `/etc/udev/rules.d/aic.rules`
-5. Reload udev
+5. Reload udev and auto-eject USB mass storage
+6. Print next-step instructions
 
 ### Manual
 
@@ -73,21 +84,21 @@ sudo depmod -a $(uname -r)
 
 ## Loading the Driver
 
-Load modules in order — Bluetooth/firmware loader first, then Wi-Fi:
+Load modules in order — firmware loader first, then Wi-Fi:
 
 ```bash
 sudo modprobe aic_load_fw
 sudo modprobe aic8800_fdrv
 ```
 
-Or with `insmod` (if not installed):
+Or with `insmod` (if not installed via `make install`):
 
 ```bash
 sudo insmod drivers/aic8800/aic_load_fw/aic_load_fw.ko
 sudo insmod drivers/aic8800/aic8800_fdrv/aic8800_fdrv.ko
 ```
 
-Verify:
+Verify modules are loaded:
 
 ```bash
 lsmod | grep aic
@@ -98,13 +109,6 @@ lsmod | grep aic
 ```bash
 sudo modprobe -r aic8800_fdrv
 sudo modprobe -r aic_load_fw
-```
-
-Or with `rmmod`:
-
-```bash
-sudo rmmod aic8800_fdrv
-sudo rmmod aic_load_fw
 ```
 
 ## Uninstallation
@@ -127,33 +131,57 @@ sudo udevadm control --reload-rules
 sudo depmod -a $(uname -r)
 ```
 
-## Usage
+## Verifying Correct Module Installation
 
-Once loaded, the wireless interface appears automatically:
+After installation, verify the WiFi driver is the **USB version**, not SDIO:
 
 ```bash
-ip link
-iwconfig
+modinfo aic8800_fdrv | grep alias
 ```
 
-Manage with standard tools: `nmcli`, `nmtui`, `wpa_supplicant`, etc.
+Expected output (USB):
+
+```
+alias:          usb:vA69Cp8800d*
+alias:          usb:vA69Cp8801d*
+alias:          usb:vA69Cp8D81d*
+```
+
+If you see `sdio:` aliases instead, the SDIO version is installed. Rebuild and reinstall:
+
+```bash
+make clean && make
+sudo make uninstall
+sudo make install
+```
 
 ## Troubleshooting
 
-### Driver fails to load
+### Device stuck in USB Mass Storage mode
 
-Check kernel messages for errors:
+If `lsusb` shows `a69c:5721 aicsemi Aic MSC` after running `make install`:
 
 ```bash
-dmesg | tail -50
+# Manual eject
+sudo eject /dev/aicudisk    # if symlink exists
+# or find the SCSI disk
+lsblk -d -o NAME,MODEL | grep -i AIC
+sudo eject /dev/sdX         # replace sdX with the actual disk
 ```
 
-### Firmware not found
+### wlan0 does not appear after loading modules
 
-Ensure firmware files exist:
+Check for errors:
 
 ```bash
-ls /lib/firmware/aic8800D80/
+dmesg | tail -30
+dmesg | grep -i aic
+```
+
+Verify firmware exists:
+
+```bash
+ls -la /lib/firmware/aic8800D80/
 ```
 
 Expected files:
@@ -166,6 +194,17 @@ Expected files:
 - `calibmode_8800d80.bin`
 - `fw_ble_scan_ad_filter.bin`
 - `aic_userconfig_8800d80.txt`
+
+### modprobe fails with "Exec format error"
+
+This usually means the module was compiled for a different kernel. Rebuild:
+
+```bash
+make clean && make
+sudo make uninstall
+sudo make install
+sudo depmod -a $(uname -r)
+```
 
 ### Module version mismatch
 
